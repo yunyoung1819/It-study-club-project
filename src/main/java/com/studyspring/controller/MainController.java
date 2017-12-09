@@ -1,7 +1,10 @@
 package com.studyspring.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.studyspring.service.UserInfoService;
 import com.studyspring.vo.UserInfoEnrollRequestVO;
+import com.studyspring.vo.UserInfoVO;
 
 @Controller
 public class MainController {
@@ -50,15 +54,48 @@ public class MainController {
 		userInfoEnrollRequestVO.setUserImage("sampleimage1.png");
 		// @RequestBody를 이용하면 setter 작업을 안해도 됨.  
 		
-		if(userInfoService.enrollUserInfoService(userInfoEnrollRequestVO) == 1){
+		/*if(userInfoService.enrollUserInfoService(userInfoEnrollRequestVO) == 1){
 			result.put("flag", "success");
 		}else{
 			result.put("flag", "fail");
-		}
+		}*/
 		
 		mv.addObject("result", result);
+		
+		// ----------------------------------Study5-------------------------------------- //
+		boolean isCheck = true;
+		//쇼핑몰 등에서 재고 품절 표시를 할 때 많이 사용함
+		if(isCheck == true){
+			Map<String, Object> retVal = new HashMap<String, Object>();
+			
+			retVal.put("type", 2);
+			
+			mv.addObject("refType", retVal);
+		}
+		mv.addObject("value", isCheck);
+		
+		// ----------------------------------Study5-------------------------------------- //
+		// mainController 
+		List<UserInfoVO> listuser = userInfoService.getUserInfoListService();
+		
+		System.out.println("user count : " + listuser.size());
+		
+		mv.addObject("listuser", listuser);
 		
 		return mv;
 	}
 	
+	// ----------------------------------Study8-------------------------------------- //
+	@RequestMapping(value="/samplepage.do", method = RequestMethod.POST)  //ioc랑 관련
+	public ModelAndView sample(ModelAndView mv, HttpServletRequest request){
+		mv.setViewName("samplepage");
+		
+		mv.addObject("name", request.getParameter("inputname"));
+		mv.addObject("age", request.getParameter("inputage"));
+		
+		//HttpServletResonse가 필요없는 이유는 html 코드를 만들기가 비효율적이다.
+		//ModelAndView로 처리
+		
+		return mv;
+	}
 }
