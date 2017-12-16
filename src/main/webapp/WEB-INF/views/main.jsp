@@ -15,6 +15,8 @@
 	<!-- Zebra-Dialog CDN -->
 	<script src="resources/js/dialog/zebra_dialog.src.js"></script>
 	<link rel="stylesheet" href="resources/css/dialog/zebra_dialog.css" type="text/css"/>
+	<!-- ProgressBar -->
+	<link rel="stylesheet" href="resources/css/progressbar/progressbarcss.css" type="text/css"/>
 </head>
 <body>
 	<div>
@@ -67,7 +69,7 @@
 	</div>
 	<br>
 	<!-- HTML JSTL  -->
-	<div id="study6">
+<%-- 	<div id="study6">
 		<p><strong style="color:Blue; font-size: 20px">6. JSTL, Table tag / 9. Zebra_Dialog, Ajax</strong></p>
 		<table border="1">
 			<!-- HTML에서 프로그래밍 적용 : JSTL -->
@@ -100,7 +102,7 @@
 			<c:if test="${fn:length(userlist) == 0}">
 				<p id='info_sub1' style='font-size:14px; color:#586069; margin:0px'><b>등록된 사용자가 없습니다.</b></p>
 			</c:if>
-		</table>
+		</table> --%>
 		<div id="study9">
 		
 		</div>
@@ -121,12 +123,141 @@
 			<p><button type='submit'>페이지 이동</button></p>
 		</form>
 	</div>
+	<br>
+	<div id="study11">
+		<p><strong style="color:Blue; font-size: 20px">11. Database (MyBatis) </strong></p>
+		<div id="conditionfield">
+			<label> * 조회 영역 </label>
+			<div>
+				<label> - 이름 : </label>&nbsp;<input type="text" id="in_name">
+				<label> , 나이 : </label>&nbsp;<input type="number" id="in_age">
+				<label> , 번호 : </label>&nbsp;<input type="text" id="in_no">
+				<br>
+				<button type="button" class="btn btn-primary" id="btn-search"> 검색 </button>
+			</div>
+		</div>
+		<br>
+		<div id="tablefield">
+			<p> tabile field... </p>
+		</div>
+		<div class="wrap-loading display-none">
+			<div><img src="resources/images/ajaxprogress/ajax-loader.gif"></div>
+		</div>
+	</div>
 </body>
 <script type="text/javascript">
-$(function(){
-
-	console.log(value1 + '+' + value2 + '=' + (value1 + value2));
-
+$(function(){   // == document.ready(function(){}) 과 비슷함
+	// html 이 먼저 만들어지고
+	// 자바스크립트가 다 만들어지면
+	// 준비상태가 된 것을 알려줌
+	$("[data-pid]").on("click", function(){  	// function은 콜백함수 CallBack function
+		var selUserName = $(this).data("pid");  // $(this) : 참조한 값을 가져옴
+		console.log(selUserName);  				//자바스크립트는 new해서 형에 관계없이 받을 수 있음 
+		
+		// 수정 선택관련 다이얼로그
+		// zebra_dialog 선언식
+		var infodialog = new $.Zebra_Dialog('<strong>Message:</strong><br><br><p>['+selUserName+'] 정보를 조회하시겠습니까?</p>',{
+			title: 'Blog Test Dialog',
+			type : 'question',
+			print : false,
+			width : 760,
+			position : ['rignt - 20', 'top + 20'],
+			buttons : ['취소', '조회'],
+			onClose : function(caption){
+				if(caption == '조회'){
+					console.log('조회');
+				}else if(caption == '취소'){
+					console.log('update cancle');
+				}
+			}
+		})
+	});
+	
+	/* 유저 조회 */
+	$('#btn-search').click(function(){
+		var in_name = $('#in_name').val();
+		var in_age = $('#in_age').val();
+		var in_no = $('#in_no').val();
+		
+		console.log(in_name + ',' + in_age + ',' + in_no);
+		
+		var trans_object =
+			{
+				'searchName' : in_name,
+				'searchAge'  : in_age,
+				'searchNo'   : in_no
+			}
+		
+		var trans_json = JSON.stringify(trans_object);  // json으로 변환
+		// json 클래스에 있는 sringify 파일 메소드
+		
+		//ajax 통신 표준적인 폼
+		$.ajax({
+			url : "http://localhost:8080/controller/searchuserdb",  //통신할 서버의 주소
+			type : 'POST',			// 서버와 어떻게 통신을 할 것인가 (get/post 방식)
+			dataType : 'json',		// 서버에 전달할 데이터의 타입, 'json'
+			data : trans_json,		// dataType에 따른 실제 데이터
+			contentType : 'application/json',	// http 통신을 하는데 필요한 스펙, 명시하지 않아도 되지만, 프로토콜에 명시해주는 것을 권장함 
+			mimeType : 'application/json',	 	// http 통신을 하는데 필요한 스펙, 명시하지 않아도 되지만, 프로토콜에 명시해주는 것을 권장함 
+			beforeSend: function(){		//ajax success가 떨어지기 전에 수행
+				$('.wrap-loading').removeClass('display-none');	//클래스를 제거
+			},
+			complete : function(){		// ajax success가 완료된 후에 수행
+				$('.wrap-loading').addClass('display-none'); // 클래스를 추가
+			},
+			success : function(retVal){
+				var userlist = []; //배열 데이터 저장//
+				userlist = retVal.val;
+				
+				var listcount = userlist.length;
+				
+				$('#tablefield').empty(); //수정된 테이블을 다시 로드하기 위해서 기존 테이블 영역을 지운다.//
+				
+				var printHTML = '';
+				
+				if(listcount > 0){
+					printHTML = "<div id='userlist'>";
+					printHTML += "<table border='1'>";
+			        	printHTML += "<thead>";
+			        	printHTML += "<tr>";
+			        	printHTML += "<th>구분</th>";
+			        	printHTML += "<th>이름</th>";
+			        	printHTML += "<th>나이</th>";
+			        	printHTML += "<th>이미지</th>";
+			        	printHTML += "<th>수정</th>";
+			        	printHTML += "<th>제거</th>";
+			        	printHTML += "</tr>";
+			        	printHTML += "</thead>"; 
+			        	printHTML += "<tbody>";
+		            
+		            //테이블에 들어갈 데이터를 삽입//
+		            $.each(userlist, function(index,value) {
+		            		printHTML += "<tr>";
+			            	printHTML += "<td>"+value.USER_NO+"</td>";
+			            	printHTML += "<td>"+value.USER_NAME+"</td>";
+			            	printHTML += "<td>"+value.USER_AGE+"</td>";
+			            	printHTML += "<td><img src='./resources/images/"+value.USER_IMAGE+"' width='100' height='100'></td>";
+			            	printHTML += "<td><button value='"+value.USER_NAME+"' onclick='userinfoupdate(this.value)'>수정</button></td>";
+			            	printHTML += "<td><button value='"+value.USER_NAME+"' onclick='userinfodelete(this.value)'>삭제</button></td>";
+			            	printHTML += "</tr>";          			  
+	       	 		});
+		            
+		            printHTML += "</tbody>";
+		            printHTML += "</table>";
+		            printHTML += "</div>";
+				} else{
+					printHTML = "<div id='userlist'>";
+					printHTML += "<p id='info_sub1' style='font-size:14px;color:#586069; margin:0px'><b>조회된 사용자가 없습니다.</b></p>";
+					printHTML += "</div>";
+				}
+				
+				$('#tablefield').append(printHTML); //다시 테이블을 보여주기 위해서 HTML코드 적용//
+			},
+			error : function(retVal, status, er){
+				alert("error: " + retVal + "status: " + status + "er: " + er);
+			}
+		});
+	});
 });
 </script>
 </html>

@@ -31,6 +31,13 @@ public class UserInfoServiceImpl implements UserInfoService{
 		return userInfoDao.getUserInfoListDao();
 	}
 
+	@Override
+	public List<Map<String, Object>> searchUserInfoDBService(Map<String, Object> params) {
+		System.out.println("¼­ºñ½º");
+		System.out.println(params);
+		return userInfoDao.searchUserInfoDBDao(params);
+	}
+
 	/*@Override
 	public int deleteUserInfoService(UserInfoDeleteRequestVO userInfoDeleteRequestVO) {
 		return userInfoDao.deleteUserInfoDao(userInfoDeleteRequestVO);

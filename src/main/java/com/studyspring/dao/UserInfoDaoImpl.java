@@ -4,12 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.studyspring.vo.UserInfoVO;
 
 @Repository  //Dao임을 Impl에다 명시해줘야함. 저장소에 연관된 얘라 @Repository로 해야함. 이걸 해놓으면 속도가 빠름
 public class UserInfoDaoImpl implements UserInfoDao{
+	
+	@Autowired
+	private SqlSessionTemplate sqlSession;
+	
 	@Override
 	public String searchNameDao(Map<String, Object> info) {
 		
@@ -51,4 +57,10 @@ public class UserInfoDaoImpl implements UserInfoDao{
 		return listuser;
 	}
 
+	@Override
+	public List<Map<String, Object>> searchUserInfoDBDao(Map<String, Object> params) {
+		System.out.println("다오");
+		System.out.println(params);
+		return sqlSession.selectList("usermanager.searchuser", params);
+	}
 }
