@@ -22,7 +22,6 @@ public class UserInfoServiceImpl implements UserInfoService{
 
 	@Override
 	public int enrollUserInfoService(UserInfoEnrollRequestVO userInfoEnrollRequestVO) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -37,9 +36,19 @@ public class UserInfoServiceImpl implements UserInfoService{
 		System.out.println(params);
 		return userInfoDao.searchUserInfoDBDao(params);
 	}
+	// Select는 테이블이 반환됨. 그래서 list로 반환
+	// insert, update나 delete는 int로 반환
+	// sql에서 update나 delete를 입력하면 3 rows delete가 반환됨. 몇 개의 
+	@Override
+	public int updateUserInfoDBService(Map<String, Object> params) {
+		return userInfoDao.updateUserInfoDBDao(params);
+	}
 
-	/*@Override
-	public int deleteUserInfoService(UserInfoDeleteRequestVO userInfoDeleteRequestVO) {
-		return userInfoDao.deleteUserInfoDao(userInfoDeleteRequestVO);
-	}*/
+	@Override
+	public int deleteUserInfoDBService(Map<String, Object> params) {
+		System.out.println("서비스 : " + params);
+		return userInfoDao.deleteUserInfoDBDao(params);
+	}
+
+
 }

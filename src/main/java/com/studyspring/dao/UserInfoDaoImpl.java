@@ -62,5 +62,18 @@ public class UserInfoDaoImpl implements UserInfoDao{
 		System.out.println("다오");
 		System.out.println(params);
 		return sqlSession.selectList("usermanager.searchuser", params);
+		// 첫번째 인자로 usermanager의 searchuser를 참조(이 쿼리문을 호출하겠다)
+		// 두번째 인자로 xmld의 parameter type으로 map 전달
+	}
+
+	@Override
+	public int updateUserInfoDBDao(Map<String, Object> params) {
+		return sqlSession.update("usermanager.updateuser", params);
+	}
+
+	@Override
+	public int deleteUserInfoDBDao(Map<String, Object> params) {
+		System.out.println("다오 : " + params);
+		return sqlSession.delete("usermanager.deleteuser", params);
 	}
 }
