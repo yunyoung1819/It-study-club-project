@@ -123,6 +123,25 @@
 			<p><button type='submit'>페이지 이동</button></p>
 		</form>
 	</div>
+	
+	<!-- 파일 업로드 다운로드 UI -->
+	<div id="study10">
+		<p><strong style="color:Blue; font-size: 20px">10. File Upload</strong></p>
+		<div id="filetransdiv">
+			<form>
+				<label>* 주제:</label>&nbsp<input type="text" id="subject" placeholder="input subject"><br>
+				<label>* 내용:</label>&nbsp<textarea class="form-control" rows="5" id="content" placeholder="input content"></textarea><br>
+				<label>* 첨부파일 :</label>&nbsp<input type="file" class="btn btn-default form-join" id="uploadfile" multiple="multiple"/><br>
+				<!-- 파일 업로드는 페이지 이동이 없기 때문에 action을 지정하지 않는다 -->
+				<!-- ajax 방식이지만 파일 업로드는 http 통신의 프로토콜이 다르기 때문에 form 태그를 사용한다 -->
+				<!-- multiple : 파일을 여러개 인식하기 위해서 multiple 을 붙여줌-->
+			</form>
+			<div id="filelist">
+			</div>
+			<button type="button" class="btn btn-primary" id="btn-enroll">등록</button>
+		</div>
+	</div>
+	
 	<br>
 	<div id="study11">
 		<p><strong style="color:Blue; font-size: 20px">11. Database (MyBatis) </strong></p>
@@ -256,8 +275,80 @@ $(function(){   // == document.ready(function(){}) 과 비슷함
 			error : function(retVal, status, er){
 				alert("error: " + retVal + "status: " + status + "er: " + er);
 			}
+		
+		
 		});
 	});
+	
+	//************************* 파일업로드
+	var files = []; //파일이 저장될 배열//
+	var filecount = 0;
+	$('[data-toggle="tooltip"]').tooltip(); 
+	//파일선택 시 발생하는 이벤트 처리(전송할 파일 목록에 등록)//
+	$('#uploadfile').change(function(event){
+		files[filecount]=event.target.files[0];
+		
+		var printHTML = "<label>첨부파일("+(filecount+1)+") " + event.target.files[0].name + "</label><br>";
+		
+		$('#filelist').append(printHTML);
+		
+		filecount++;
+	});
+	$('#btn-enroll').click(function(){
+		var subjecttext = $('#subject').val();
+		var contenttext = $('#content').val();
+		var arraycount = files.length;
+		
+		//파일전송을 위한 FormData설정//
+		var formData = new FormData();
+		
+		formData.append("subject", subjecttext);
+		formData.append("content", contenttext);
+		
+		for(var i=0; i<arraycount; i++){
+			formData.append("uploadfile["+i+"]", files[i]);
+		}
+		
+		if(arraycount == 0){
+			//수정 선택관련 다이얼로그//
+			var infodialog = new $.Zebra_Dialog('<strong>Message:</strong><br><br><p>현재 선택된 파일이 없습니다.</p>',{
+				title: 'Blog Test Dialog',
+				type: 'warning',
+				print: false,
+				width: 760,
+				position: ['right - 20', 'top + 20'],
+				buttons: ['닫기'],
+				onClose: function(caption){
+	
+				}
+			});
+		} else{
+			//ajax call//
+			$.ajax({
+				type : 'POST',
+	    			url : 'http://localhost:8080/controller/enrollajax',
+	    			data : formData,
+	    			//파일 전송 시 processData, contentType을 null로 설정//
+	   		 	processData : false,
+	    			contentType : false,
+		    		beforeSend:function(){
+		                $('.wrap-loading').removeClass('display-none');
+		            },
+		            complete:function(){
+		                $('.wrap-loading').addClass('display-none');
+		            },
+		    		success : function(retVal) {
+		    			alert('enroll success...');
+		    			
+		    			$('#filelist').empty();
+		    			filecount=0;
+		    		},
+		    		error : function(retVal, status, er) {
+		    			alert("error: "+retVal+" status: "+status+" er:"+er);
+		    		}
+			});	
+		}
+	});	
 });
 
 ////////////////////////////update////////////////////////////////////
@@ -591,6 +682,8 @@ function userinfodelete(userName){
 		}
 	});
 }
+
+
 
 </script>
 </html>
